@@ -88,29 +88,29 @@
 ### Скриншоты сайта
 
 #### Главная страница (десктоп)
-![Главная страница](screenshots/screenshot_main.jpg)
+![Главная страница](../screenshots/screenshot_main.jpg)
 
 #### Главная страница (мобильная)
-![Мобильная версия](screenshots/mobile_page1.jpg)
+![Мобильная версия](../screenshots/mobile_page1.jpg)
 
 #### О проекте
-![О проекте](screenshots/screenshot_about_page.png.jpg)
+![О проекте](../screenshots/screenshot_about_page.jpg)
 
 #### Участники
-![Участники](screenshots/screenshot_team_page.jpg)
+![Участники](../screenshots/screenshot_team_page.jpg)
 
 #### Журнал этапов
-![Журнал](screenshots/screenshot_journal_page.jpg)
+![Журнал](../screenshots/screenshot_journal_page.jpg)
 
 #### Ресурсы
-![Ресурсы — десктоп](screenshots/screenshot_source_page.jpg)
-![Ресурсы — мобилка](screenshots/mobile_page2.jpg)
+![Ресурсы — десктоп](../screenshots/screenshot_source_page.jpg)
+![Ресурсы — мобильная версия](../screenshots/mobile_page2.jpg)
 
 #### Исходный код
-![HTML-разметка](screenshots/screenshot_sourcecode_main.jpg)
+![HTML-разметка](../screenshots/screenshot_sourcecode_main.jpg)
 
 #### GitHub-репозиторий
-![Структура репозитория](screenshots/screenshot_gitfiles.jpg)
+![Структура репозитория](../screenshots/screenshot_gitfiles.jpg)
 
 ---
 
