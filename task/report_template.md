@@ -91,7 +91,7 @@
 ![Главная страница](../screenshots/screenshot_main.jpg)
 
 #### Главная страница (мобильная)
-![Мобильная версия](../screenshots/mobile_page1.jpg)
+![Мобильная версия](../screenshots/mobile_page2.jpg)
 
 #### О проекте
 ![О проекте](../screenshots/screenshot_about_page.jpg)
@@ -104,7 +104,7 @@
 
 #### Ресурсы
 ![Ресурсы — десктоп](../screenshots/screenshot_source_page.jpg)
-![Ресурсы — мобильная версия](../screenshots/mobile_page2.jpg)
+![Ресурсы — мобильная версия](../screenshots/mobile_page1.jpg)
 
 #### Исходный код
 ![HTML-разметка](../screenshots/screenshot_sourcecode_main.jpg)
