@@ -1,0 +1,30 @@
+baseURL = "https://maksinand.github.io/TestingProject_Practice/"
+canonifyURLs = true
+languageCode = 'ru'
+title = 'Группа проектов тестирования'
+theme = 'ananke'
+
+[menu]
+  [[menu.main]]
+    identifier = "about"
+    name = "О проекте"
+    url = "/about/"
+    weight = 1
+
+  [[menu.main]]
+    identifier = "team"
+    name = "Участники"
+    url = "/team/"
+    weight = 2
+
+  [[menu.main]]
+    identifier = "journal"
+    name = "Журнал"
+    url = "/journal/"
+    weight = 3
+
+  [[menu.main]]
+    identifier = "resources"
+    name = "Ресурсы"
+    url = "/resources/"
+    weight = 4

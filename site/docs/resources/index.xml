@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Resources on Группа проектов тестирования</title>
+    <link>http://localhost:1313/resources/</link>
+    <description>Recent content in Resources on Группа проектов тестирования</description>
+    <generator>Hugo</generator>
+    <language>ru</language>
+    <atom:link href="http://localhost:1313/resources/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Ресурсы</title>
+      <link>http://localhost:1313/resources/resources/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/resources/resources/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;images/testlist.jpg&#34; alt=&#34;Материалы&#34;&gt;&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://docs.google.com/spreadsheets/d/1QThZxfnxU09G-Nj4cCeE4F7WYaVrKJ4mEON3ddHJDpg/edit?usp=sharing&#34;&gt;Таблица заявок&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://www.guru99.com/software-testing.html&#34;&gt;Основы тестирования ПО&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://qa-academy.by/blog/kak-pisat-checklisty-dlya-testirovaniya/&#34;&gt;Как писать чек-листы (QA Academy)&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
+    </item>
+  </channel>
+</rss>
