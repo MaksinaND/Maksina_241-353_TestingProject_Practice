@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head><script src="/TestingProject_Practice/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=TestingProject_Practice/livereload" data-no-instant defer></script>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Безопасность LAN | Группа проектов тестирования</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <meta name="description" content="Базовая настройка сети Game Dev студии в PNETLab
+1. Сетевая архитектура
+
+
+  
+      
+          Сегмент
+          VLAN
+          Подсеть
+          Доступные IP
+          Назначение
+      
+  
+  
+      
+          Программисты
+          2
+          10.0.0.128/25
+          .129 – .254
+          Рабочие станции
+      
+      
+          Администраторы
+          6
+          10.0.0.0/28
+          .1 – .14
+          Доступ к управлению
+      
+      
+          Серверы
+          3
+          10.0.2.0/24
+          .1 – .254
+          DNS, DHCP, GIT, Syslog и т.д.
+      
+      
+          Интернет / WAN
+          —
+          192.168.10.0/24
+          .1 – .254
+          Подключение к внешней сети
+      
+  
+
+2. Конфигурация оборудования
+
+Подробнее про работу с оборудованием и конфигурацию оборудования в PNETLab можно посмотреть в вынесенном отдельно модуле Базовая конфигурация
+Также в приложение вынесены модули Атака-Защита сетевой инфраструктуры (упрощенного варианта вышеописанной сети), где более подробно разобраны:
+
+CAM-table overflow
+ARP-Spoofing
+VLAN Hopping
+MAC-Spoofing
+
+
+
+Switch7 (основной для доступа)
+
+Базовая настройка:
+
+enable
+conf t
+hostname Switch7
+no ip domain-lookup
+enable secret strongpass
+service password-encryption
+banner motd ^WARNING: Unauthorized access is prohibited!^
+
+VLAN и trunk:
+
+vtp domain gamedev
+vtp mode transparent
+
+vlan 2
+ name Programmers
+vlan 3
+ name Servers
+vlan 6
+ name Admins
+
+interface range e0/1, e0/2
+ switchport mode trunk
+
+Настройка порта для Win10 (VLAN 2 &#43; Port-Security):
+
+interface e1/2
+ description Подключение Win10 (VLAN 2 - Programmers)
+ switchport mode access
+ switchport access vlan 2
+ switchport port-security
+ switchport port-security maximum 1          ! Только 1 MAC-адрес разрешён
+ switchport port-security mac-address sticky ! Автоматически запоминает MAC
+ switchport port-security violation restrict ! Нарушения логгируются, но порт не отключается
+Switch8 (серверный)
+hostname Switch8
+vtp mode transparent
+vtp domain gamedev
+
+vlan 3
+ name Servers
+
+interface e1/0
+ switchport mode access
+ switchport access vlan 3
+
+interface e1/1
+ switchport mode access
+ switchport access vlan 3
+
+interface e1/2
+ switchport mode access
+ switchport access vlan 3
+
+logging host 10.0.2.10
+Switch9 (дистрибутивный)
+hostname Switch9
+vtp mode transparent
+vtp domain gamedev
+
+interface e0/0
+ switchport mode trunk
+
+interface e0/1
+ switchport mode trunk
+
+interface e0/2
+ switchport mode access
+ switchport access vlan 6
+Switch (7-9)
+logging buffered 4096 debugging             ! Логирование в буфер памяти
+logging host 10.0.2.10                      ! Сетевой syslog-сервер
+logging trap informational                  ! Уровень логгирования на удалённый сервер
+service timestamps log datetime msec        ! Отметка времени с миллисекундами
+Router (межвлан-маршрутизация и NAT)
+
+Интерфейсы
+
+interface e0/0
+ ip address 192.168.10.254 255.255.255.0
+ no shutdown
+
+interface e0/1.2
+ encapsulation dot1Q 2
+ ip address 10.0.0.1 255.255.255.128
+
+interface e0/1.3
+ encapsulation dot1Q 3
+ ip address 10.0.2.254 255.255.255.0
+
+interface e0/1.6
+ encapsulation dot1Q 6
+ ip address 10.0.0.14 255.255.255.240
+
+NAT и доступ в интернет:
+
+ip nat inside source list 1 interface e0/0 overload
+
+access-list 1 permit 10.0.0.0 0.0.255.255
+
+interface e0/0
+ ip nat outside
+interface e0/1
+ ip nat inside
+Дополнительно">
+    <meta name="generator" content="Hugo 0.146.6">
+    
+    
+    
+      <meta name="robots" content="noindex, nofollow">
+    
+    
+
+    
+<link rel="stylesheet" href="http://localhost:1313/TestingProject_Practice/ananke/css/main.min.css" >
+
+
+
+
+    
+
+
+    
+      
+
+    
+
+    
+
+    
+      <link rel="canonical" href="http://localhost:1313/TestingProject_Practice/practice/">
+    
+
+    <meta property="og:url" content="http://localhost:1313/TestingProject_Practice/practice/">
+  <meta property="og:site_name" content="Группа проектов тестирования">
+  <meta property="og:title" content="Безопасность LAN">
+  <meta property="og:description" content="Базовая настройка сети Game Dev студии в PNETLab 1. Сетевая архитектура Сегмент VLAN Подсеть Доступные IP Назначение Программисты 2 10.0.0.128/25 .129 – .254 Рабочие станции Администраторы 6 10.0.0.0/28 .1 – .14 Доступ к управлению Серверы 3 10.0.2.0/24 .1 – .254 DNS, DHCP, GIT, Syslog и т.д. Интернет / WAN — 192.168.10.0/24 .1 – .254 Подключение к внешней сети 2. Конфигурация оборудования Подробнее про работу с оборудованием и конфигурацию оборудования в PNETLab можно посмотреть в вынесенном отдельно модуле Базовая конфигурация Также в приложение вынесены модули Атака-Защита сетевой инфраструктуры (упрощенного варианта вышеописанной сети), где более подробно разобраны: CAM-table overflow ARP-Spoofing VLAN Hopping MAC-Spoofing Switch7 (основной для доступа) Базовая настройка: enableconf thostname Switch7no ip domain-lookupenable secret strongpassservice password-encryptionbanner motd ^WARNING: Unauthorized access is prohibited!^ VLAN и trunk: vtp domain gamedevvtp mode transparentvlan 2name Programmersvlan 3name Serversvlan 6name Adminsinterface range e0/1, e0/2switchport mode trunk Настройка порта для Win10 (VLAN 2 &#43; Port-Security): interface e1/2description Подключение Win10 (VLAN 2 - Programmers)switchport mode accessswitchport access vlan 2switchport port-securityswitchport port-security maximum 1 ! Только 1 MAC-адрес разрешёнswitchport port-security mac-address sticky ! Автоматически запоминает MACswitchport port-security violation restrict ! Нарушения логгируются, но порт не отключается Switch8 (серверный) hostname Switch8vtp mode transparentvtp domain gamedevvlan 3name Serversinterface e1/0switchport mode accessswitchport access vlan 3interface e1/1switchport mode accessswitchport access vlan 3interface e1/2switchport mode accessswitchport access vlan 3logging host 10.0.2.10 Switch9 (дистрибутивный) hostname Switch9vtp mode transparentvtp domain gamedevinterface e0/0switchport mode trunkinterface e0/1switchport mode trunkinterface e0/2switchport mode accessswitchport access vlan 6 Switch (7-9) logging buffered 4096 debugging ! Логирование в буфер памятиlogging host 10.0.2.10 ! Сетевой syslog-серверlogging trap informational ! Уровень логгирования на удалённый серверservice timestamps log datetime msec ! Отметка времени с миллисекундами Router (межвлан-маршрутизация и NAT) Интерфейсы interface e0/0ip address 192.168.10.254 255.255.255.0no shutdowninterface e0/1.2encapsulation dot1Q 2ip address 10.0.0.1 255.255.255.128interface e0/1.3encapsulation dot1Q 3ip address 10.0.2.254 255.255.255.0interface e0/1.6encapsulation dot1Q 6ip address 10.0.0.14 255.255.255.240 NAT и доступ в интернет: ip nat inside source list 1 interface e0/0 overloadaccess-list 1 permit 10.0.0.0 0.0.255.255interface e0/0ip nat outsideinterface e0/1ip nat inside Дополнительно">
+  <meta property="og:locale" content="ru">
+  <meta property="og:type" content="article">
+
+  <meta itemprop="name" content="Безопасность LAN">
+  <meta itemprop="description" content="Базовая настройка сети Game Dev студии в PNETLab 1. Сетевая архитектура Сегмент VLAN Подсеть Доступные IP Назначение Программисты 2 10.0.0.128/25 .129 – .254 Рабочие станции Администраторы 6 10.0.0.0/28 .1 – .14 Доступ к управлению Серверы 3 10.0.2.0/24 .1 – .254 DNS, DHCP, GIT, Syslog и т.д. Интернет / WAN — 192.168.10.0/24 .1 – .254 Подключение к внешней сети 2. Конфигурация оборудования Подробнее про работу с оборудованием и конфигурацию оборудования в PNETLab можно посмотреть в вынесенном отдельно модуле Базовая конфигурация Также в приложение вынесены модули Атака-Защита сетевой инфраструктуры (упрощенного варианта вышеописанной сети), где более подробно разобраны: CAM-table overflow ARP-Spoofing VLAN Hopping MAC-Spoofing Switch7 (основной для доступа) Базовая настройка: enableconf thostname Switch7no ip domain-lookupenable secret strongpassservice password-encryptionbanner motd ^WARNING: Unauthorized access is prohibited!^ VLAN и trunk: vtp domain gamedevvtp mode transparentvlan 2name Programmersvlan 3name Serversvlan 6name Adminsinterface range e0/1, e0/2switchport mode trunk Настройка порта для Win10 (VLAN 2 &#43; Port-Security): interface e1/2description Подключение Win10 (VLAN 2 - Programmers)switchport mode accessswitchport access vlan 2switchport port-securityswitchport port-security maximum 1 ! Только 1 MAC-адрес разрешёнswitchport port-security mac-address sticky ! Автоматически запоминает MACswitchport port-security violation restrict ! Нарушения логгируются, но порт не отключается Switch8 (серверный) hostname Switch8vtp mode transparentvtp domain gamedevvlan 3name Serversinterface e1/0switchport mode accessswitchport access vlan 3interface e1/1switchport mode accessswitchport access vlan 3interface e1/2switchport mode accessswitchport access vlan 3logging host 10.0.2.10 Switch9 (дистрибутивный) hostname Switch9vtp mode transparentvtp domain gamedevinterface e0/0switchport mode trunkinterface e0/1switchport mode trunkinterface e0/2switchport mode accessswitchport access vlan 6 Switch (7-9) logging buffered 4096 debugging ! Логирование в буфер памятиlogging host 10.0.2.10 ! Сетевой syslog-серверlogging trap informational ! Уровень логгирования на удалённый серверservice timestamps log datetime msec ! Отметка времени с миллисекундами Router (межвлан-маршрутизация и NAT) Интерфейсы interface e0/0ip address 192.168.10.254 255.255.255.0no shutdowninterface e0/1.2encapsulation dot1Q 2ip address 10.0.0.1 255.255.255.128interface e0/1.3encapsulation dot1Q 3ip address 10.0.2.254 255.255.255.0interface e0/1.6encapsulation dot1Q 6ip address 10.0.0.14 255.255.255.240 NAT и доступ в интернет: ip nat inside source list 1 interface e0/0 overloadaccess-list 1 permit 10.0.0.0 0.0.255.255interface e0/0ip nat outsideinterface e0/1ip nat inside Дополнительно">
+  <meta itemprop="wordCount" content="791">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Безопасность LAN">
+  <meta name="twitter:description" content="Базовая настройка сети Game Dev студии в PNETLab 1. Сетевая архитектура Сегмент VLAN Подсеть Доступные IP Назначение Программисты 2 10.0.0.128/25 .129 – .254 Рабочие станции Администраторы 6 10.0.0.0/28 .1 – .14 Доступ к управлению Серверы 3 10.0.2.0/24 .1 – .254 DNS, DHCP, GIT, Syslog и т.д. Интернет / WAN — 192.168.10.0/24 .1 – .254 Подключение к внешней сети 2. Конфигурация оборудования Подробнее про работу с оборудованием и конфигурацию оборудования в PNETLab можно посмотреть в вынесенном отдельно модуле Базовая конфигурация Также в приложение вынесены модули Атака-Защита сетевой инфраструктуры (упрощенного варианта вышеописанной сети), где более подробно разобраны: CAM-table overflow ARP-Spoofing VLAN Hopping MAC-Spoofing Switch7 (основной для доступа) Базовая настройка: enableconf thostname Switch7no ip domain-lookupenable secret strongpassservice password-encryptionbanner motd ^WARNING: Unauthorized access is prohibited!^ VLAN и trunk: vtp domain gamedevvtp mode transparentvlan 2name Programmersvlan 3name Serversvlan 6name Adminsinterface range e0/1, e0/2switchport mode trunk Настройка порта для Win10 (VLAN 2 &#43; Port-Security): interface e1/2description Подключение Win10 (VLAN 2 - Programmers)switchport mode accessswitchport access vlan 2switchport port-securityswitchport port-security maximum 1 ! Только 1 MAC-адрес разрешёнswitchport port-security mac-address sticky ! Автоматически запоминает MACswitchport port-security violation restrict ! Нарушения логгируются, но порт не отключается Switch8 (серверный) hostname Switch8vtp mode transparentvtp domain gamedevvlan 3name Serversinterface e1/0switchport mode accessswitchport access vlan 3interface e1/1switchport mode accessswitchport access vlan 3interface e1/2switchport mode accessswitchport access vlan 3logging host 10.0.2.10 Switch9 (дистрибутивный) hostname Switch9vtp mode transparentvtp domain gamedevinterface e0/0switchport mode trunkinterface e0/1switchport mode trunkinterface e0/2switchport mode accessswitchport access vlan 6 Switch (7-9) logging buffered 4096 debugging ! Логирование в буфер памятиlogging host 10.0.2.10 ! Сетевой syslog-серверlogging trap informational ! Уровень логгирования на удалённый серверservice timestamps log datetime msec ! Отметка времени с миллисекундами Router (межвлан-маршрутизация и NAT) Интерфейсы interface e0/0ip address 192.168.10.254 255.255.255.0no shutdowninterface e0/1.2encapsulation dot1Q 2ip address 10.0.0.1 255.255.255.128interface e0/1.3encapsulation dot1Q 3ip address 10.0.2.254 255.255.255.0interface e0/1.6encapsulation dot1Q 6ip address 10.0.0.14 255.255.255.240 NAT и доступ в интернет: ip nat inside source list 1 interface e0/0 overloadaccess-list 1 permit 10.0.0.0 0.0.255.255interface e0/0ip nat outsideinterface e0/1ip nat inside Дополнительно">
+
+	
+  </head><body class="ma0 avenir bg-near-white development">
+
+    
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l center items-center justify-between">
+    <a href="http://localhost:1313/TestingProject_Practice/" class="f3 fw2 hover-white white-90 dib no-underline">
+      
+        Группа проектов тестирования
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+        <ul class="pl0 mr3">
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white white-90 no-underline" href="http://localhost:1313/TestingProject_Practice/about/" title="О проекте page">
+              О проекте
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white white-90 no-underline" href="http://localhost:1313/TestingProject_Practice/team/" title="Участники page">
+              Участники
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white white-90 no-underline" href="http://localhost:1313/TestingProject_Practice/journal/" title="Журнал page">
+              Журнал
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white white-90 no-underline" href="http://localhost:1313/TestingProject_Practice/resources/" title="Ресурсы page">
+              Ресурсы
+            </a>
+          </li>
+          
+          <li class="list f5 f4-ns fw4 dib pr3">
+            <a class="hover-white white-90 no-underline" href="http://localhost:1313/TestingProject_Practice/practice/" title="Безопасность LAN page">
+              Безопасность LAN
+            </a>
+          </li>
+          
+        </ul>
+      
+      <div class="ananke-socials"></div>
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+    <main class="pb7" role="main">
+      
+  
+  
+  <article class="flex-l mw8 center ph3 flex-wrap justify-between">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked ttu">
+          
+        Группа проектов тестирования
+      </aside><div id="sharing" class="mt3 ananke-socials"></div>
+<h1 class="f1 athelas mt3 mb1">Безопасность LAN</h1>
+      
+      
+      
+
+      
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-two-thirds-l"><h1 id="базовая-настройка-сети-game-dev-студии-в-pnetlab">Базовая настройка сети Game Dev студии в PNETLab</h1>
+<h2 id="1-сетевая-архитектура">1. Сетевая архитектура</h2>
+<p><img src="http://localhost:1313/TestingProject_Practice/images/1_netplan.jpg" alt=""></p>
+<table>
+  <thead>
+      <tr>
+          <th>Сегмент</th>
+          <th>VLAN</th>
+          <th>Подсеть</th>
+          <th>Доступные IP</th>
+          <th>Назначение</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Программисты</td>
+          <td>2</td>
+          <td><code>10.0.0.128/25</code></td>
+          <td><code>.129</code> – <code>.254</code></td>
+          <td>Рабочие станции</td>
+      </tr>
+      <tr>
+          <td>Администраторы</td>
+          <td>6</td>
+          <td><code>10.0.0.0/28</code></td>
+          <td><code>.1</code> – <code>.14</code></td>
+          <td>Доступ к управлению</td>
+      </tr>
+      <tr>
+          <td>Серверы</td>
+          <td>3</td>
+          <td><code>10.0.2.0/24</code></td>
+          <td><code>.1</code> – <code>.254</code></td>
+          <td>DNS, DHCP, GIT, Syslog и т.д.</td>
+      </tr>
+      <tr>
+          <td>Интернет / WAN</td>
+          <td>—</td>
+          <td><code>192.168.10.0/24</code></td>
+          <td><code>.1</code> – <code>.254</code></td>
+          <td>Подключение к внешней сети</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="2-конфигурация-оборудования">2. Конфигурация оборудования</h2>
+<ul>
+<li>Подробнее про работу с оборудованием и конфигурацию оборудования в PNETLab можно посмотреть в вынесенном отдельно модуле <strong>Базовая конфигурация</strong></li>
+<li>Также в приложение вынесены модули Атака-Защита сетевой инфраструктуры (упрощенного варианта вышеописанной сети), где более подробно разобраны:
+<ul>
+<li><strong>CAM-table overflow</strong></li>
+<li><strong>ARP-Spoofing</strong></li>
+<li><strong>VLAN Hopping</strong></li>
+<li><strong>MAC-Spoofing</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="switch7-основной-для-доступа">Switch7 (основной для доступа)</h3>
+<ul>
+<li>Базовая настройка:</li>
+</ul>
+<pre tabindex="0"><code>enable
+conf t
+hostname Switch7
+no ip domain-lookup
+enable secret strongpass
+service password-encryption
+banner motd ^WARNING: Unauthorized access is prohibited!^
+</code></pre><ul>
+<li>VLAN и trunk:</li>
+</ul>
+<pre tabindex="0"><code>vtp domain gamedev
+vtp mode transparent
+
+vlan 2
+ name Programmers
+vlan 3
+ name Servers
+vlan 6
+ name Admins
+
+interface range e0/1, e0/2
+ switchport mode trunk
+</code></pre><ul>
+<li>Настройка порта для Win10 (VLAN 2 + Port-Security):</li>
+</ul>
+<pre tabindex="0"><code>interface e1/2
+ description Подключение Win10 (VLAN 2 - Programmers)
+ switchport mode access
+ switchport access vlan 2
+ switchport port-security
+ switchport port-security maximum 1          ! Только 1 MAC-адрес разрешён
+ switchport port-security mac-address sticky ! Автоматически запоминает MAC
+ switchport port-security violation restrict ! Нарушения логгируются, но порт не отключается
+</code></pre><h3 id="switch8-серверный">Switch8 (серверный)</h3>
+<pre tabindex="0"><code>hostname Switch8
+vtp mode transparent
+vtp domain gamedev
+
+vlan 3
+ name Servers
+
+interface e1/0
+ switchport mode access
+ switchport access vlan 3
+
+interface e1/1
+ switchport mode access
+ switchport access vlan 3
+
+interface e1/2
+ switchport mode access
+ switchport access vlan 3
+
+logging host 10.0.2.10
+</code></pre><h3 id="switch9-дистрибутивный">Switch9 (дистрибутивный)</h3>
+<pre tabindex="0"><code>hostname Switch9
+vtp mode transparent
+vtp domain gamedev
+
+interface e0/0
+ switchport mode trunk
+
+interface e0/1
+ switchport mode trunk
+
+interface e0/2
+ switchport mode access
+ switchport access vlan 6
+</code></pre><h3 id="switch-7-9">Switch (7-9)</h3>
+<pre tabindex="0"><code>logging buffered 4096 debugging             ! Логирование в буфер памяти
+logging host 10.0.2.10                      ! Сетевой syslog-сервер
+logging trap informational                  ! Уровень логгирования на удалённый сервер
+service timestamps log datetime msec        ! Отметка времени с миллисекундами
+</code></pre><h3 id="router-межвлан-маршрутизация-и-nat">Router (межвлан-маршрутизация и NAT)</h3>
+<ul>
+<li>Интерфейсы</li>
+</ul>
+<pre tabindex="0"><code>interface e0/0
+ ip address 192.168.10.254 255.255.255.0
+ no shutdown
+
+interface e0/1.2
+ encapsulation dot1Q 2
+ ip address 10.0.0.1 255.255.255.128
+
+interface e0/1.3
+ encapsulation dot1Q 3
+ ip address 10.0.2.254 255.255.255.0
+
+interface e0/1.6
+ encapsulation dot1Q 6
+ ip address 10.0.0.14 255.255.255.240
+</code></pre><ul>
+<li>NAT и доступ в интернет:</li>
+</ul>
+<pre tabindex="0"><code>ip nat inside source list 1 interface e0/0 overload
+
+access-list 1 permit 10.0.0.0 0.0.255.255
+
+interface e0/0
+ ip nat outside
+interface e0/1
+ ip nat inside
+</code></pre><p>Дополнительно</p>
+<ul>
+<li>DHCP (если не на сервере):</li>
+</ul>
+<pre tabindex="0"><code>ip dhcp pool PROGRAMMERS
+ network 10.0.0.128 255.255.255.128
+ default-router 10.0.0.1
+ dns-server 10.0.2.10
+
+ip dhcp pool ADMINS
+ network 10.0.0.0 255.255.255.240
+ default-router 10.0.0.14
+ dns-server 10.0.2.10
+</code></pre><h3 id="pfsense-firewall--wan-шлюз">pfSense (Firewall + WAN шлюз)</h3>
+<ul>
+<li>
+<p>WAN: e0 — подключение к интернету</p>
+</li>
+<li>
+<p>LAN: e1 — 192.168.10.1/24</p>
+</li>
+<li>
+<p>Базовые правила firewall:</p>
+<ul>
+<li>Разрешить:
+<ul>
+<li>HTTP/HTTPS</li>
+<li>DNS, SSH, ICMP</li>
+<li>NAT к внешнему</li>
+</ul>
+</li>
+<li>Блокировать:
+<ul>
+<li>МежVLAN (кроме Admin → Server)</li>
+<li>Входящие подключения к pfSense</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>IDS / IPS:</p>
+<ul>
+<li>Установить пакет через pfSense Package Manager
+-Настроить:
+<ul>
+<li>LAN-интерфейс</li>
+<li>Правила: Emerging Threats, Snort GPL</li>
+</ul>
+</li>
+<li>Алерты:
+<ul>
+<li>Port Scan</li>
+<li>Brute Force</li>
+<li>Malware Activity</li>
+</ul>
+</li>
+<li>Включить blocking mode</li>
+</ul>
+</li>
+<li>
+<p>Логирование (настройка):</p>
+<ul>
+<li>System &gt; Logging -&gt; Remote syslog
+<ul>
+<li>IP: 10.0.2.10</li>
+<li>Facility: local0</li>
+<li>Enable logging firewall events</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="3-серверы--развертывание-служб">3. Серверы — развертывание служб</h2>
+<p>Настройка серверов (пример):</p>
+<h3 id="winserver16-100210---syslog--dns--dhcp-если-не-на-роутере">WinServer16 (10.0.2.10)  — SYSLOG + DNS + DHCP (если не на роутере)</h3>
+<h4 id="rsyslog-приёмник">RSyslog приёмник</h4>
+<ul>
+<li>Установка NXLog:</li>
+</ul>
+<pre tabindex="0"><code>Install-PackageProvider -Name NuGet -Force
+Install-Module -Name nxlog-ce
+</code></pre><p>Конфигурация (<code>nxlog.conf</code>):</p>
+<pre tabindex="0"><code>&lt;Input in&gt;
+  Module im_udp
+  Host 0.0.0.0
+  Port 514
+&lt;/Input&gt;
+
+&lt;Output out&gt;
+  Module om_file
+  File &#34;C:\\Logs\\switch_logs.log&#34;
+&lt;/Output&gt;
+
+&lt;Route r&gt;
+  Path in =&gt; out
+&lt;/Route&gt;
+</code></pre><h4 id="dns-server">DNS Server</h4>
+<ul>
+<li>Зона: <code>gamedev.local</code></li>
+<li>DNS-записи:
+<ul>
+<li>router.gamedev.local -&gt; 10.0.0.1</li>
+<li>git.gamedev.local -&gt; 10.0.2.20</li>
+<li>files.gamedev.local -&gt; 10.0.2.30</li>
+</ul>
+</li>
+</ul>
+<h3 id="winserver22-100220--git--jenkins">WinServer22 (10.0.2.20) — GIT + Jenkins</h3>
+<ul>
+<li>GitLab Runner (Docker или EXE)</li>
+<li>Jenkins с интеграцией в AD (если настроено)</li>
+<li>SSH ключи деплоя</li>
+<li>Логирование действий разработчиков</li>
+</ul>
+<h3 id="linux-сервер-100230--fail2ban-rsyslog-rsync">Linux-сервер (10.0.2.30) — Fail2Ban, rsyslog, rsync</h3>
+<ul>
+<li>rsyslog (приём логов с Cisco/pfSense)</li>
+<li>Fail2Ban</li>
+<li>Git mirror / CI</li>
+<li>SFTP</li>
+</ul>
+<h2 id="4-security-policy-checklist">4. Security Policy Checklist</h2>
+<h3 id="a-контроль-доступа">A. Контроль доступа</h3>
+<table>
+  <thead>
+      <tr>
+          <th>Группа</th>
+          <th>VLAN</th>
+          <th>Доступ к</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Программисты</td>
+          <td>2</td>
+          <td>Git, Jenkins, интернет</td>
+      </tr>
+      <tr>
+          <td>Администраторы</td>
+          <td>6</td>
+          <td>Полный доступ</td>
+      </tr>
+      <tr>
+          <td>Серверы</td>
+          <td>3</td>
+          <td>Только по нужным портам</td>
+      </tr>
+  </tbody>
+</table>
+<h4 id="acl-на-роутере">ACL на роутере:</h4>
+<pre tabindex="0"><code>access-list 100 deny ip 10.0.0.128 0.0.0.127 10.0.2.0 0.0.0.255
+access-list 100 permit ip any any
+
+interface e0/1.2
+ ip access-group 100 in
+</code></pre><h3 id="b-аудит-и-логгирование">B. Аудит и логгирование</h3>
+<ul>
+<li>Все устройства логируют на 10.0.2.10</li>
+<li>Используется:
+<ul>
+<li>login on-success/failure</li>
+<li>logging trap informational</li>
+<li>pfSense -&gt; syslog</li>
+</ul>
+</li>
+<li>Анализ логов через ELK stack (опц.)</li>
+</ul>
+<h3 id="c-резервное-копирование">C. Резервное копирование</h3>
+<ul>
+<li>WinServer16: резерв DNS, DHCP и SYSLOG каждую ночь на NAS</li>
+<li>Linux-сервер:
+<ul>
+<li>rsnapshot / rsync на внешний диск</li>
+<li>Журнал rsyslog сохраняется ежедневно</li>
+</ul>
+</li>
+<li>Cisco config: <code>copy running-config tftp</code> по расписанию через cron или вручную</li>
+</ul>
+<h3 id="d-обновления">D. Обновления</h3>
+<ul>
+<li>Windows Server -&gt; WSUS или вручную еженедельно</li>
+<li>Linux -&gt; еженедельно вручную с ипользованием менеджера пакетов</li>
+<li>Cisco -&gt; регулярная проверка (минимум раз в месяц) и обновление образов</li>
+<li>pfSense -&gt; ручное обновление через GUI</li>
+</ul>
+<h3 id="e-пароли-и-аутентификация">E. Пароли и аутентификация</h3>
+<ul>
+<li>Сложные пароли &gt;= 15 символов</li>
+<li>Ротация каждые 90 дней (опц.)</li>
+<li>Двухфакторная авторизация</li>
+<li>SSH доступ (если есть) — по ключам</li>
+</ul>
+<h3 id="f-idsips-и-защита-от-атак">F. IDS/IPS и защита от атак</h3>
+<ul>
+<li>Suricata на pfSense</li>
+<li>Fail2Ban на Linux</li>
+<li>Ограничение по MAC-адресу на Switch7/8</li>
+<li>Блокировка неизвестных устройств через port-security</li>
+</ul>
+<ul class="pa0">
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div>
+    </div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+</aside>
+
+  </article>
+
+    </main>
+    <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white white-70 dn dib-ns pv2 ph3 no-underline" href="http://localhost:1313/TestingProject_Practice/" >
+    &copy;  Группа проектов тестирования 2025 
+  </a>
+    <div><div class="ananke-socials"></div>
+</div>
+  </div>
+</footer>
+
+  </body>
+</html>
