@@ -27,11 +27,11 @@
             <a href="/TestingProject_Practice/" class="f3 fw2 hover-white white-90 dib no-underline">Группа проектов тестирования</a>
             <div class="flex-l items-center">
               <ul class="pl0 mr3">
-                <li><a class="hover-white white-90 no-underline" href="/TestingProject_Practice/about/">О проекте</a></li>
-                <li><a class="hover-white white-90 no-underline" href="/TestingProject_Practice/team/">Участники</a></li>
-                <li><a class="hover-white white-90 no-underline" href="/TestingProject_Practice/journal/">Журнал</a></li>
-                <li><a class="hover-white white-90 no-underline" href="/TestingProject_Practice/resources/">Ресурсы</a></li>
-                <li><a class="hover-white white-90 no-underline" href="/TestingProject_Practice/practice/">Безопасность LAN</a></li>
+                <li><a href="/TestingProject_Practice/about/">О проекте</a></li>
+                <li><a href="/TestingProject_Practice/team/">Участники</a></li>
+                <li><a href="/TestingProject_Practice/journal/">Журнал</a></li>
+                <li><a href="/TestingProject_Practice/resources/">Ресурсы</a></li>
+                <li><a href="/TestingProject_Practice/practice/">Безопасность LAN</a></li>
               </ul>
             </div>
           </div>
@@ -47,11 +47,11 @@
 
         <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-two-thirds-l">
           <h2>Базовая настройка сети Game Dev студии в PNETLab</h2>
+          
           <h3>1. Сетевая архитектура</h3>
-          <img src="/TestingProject_Practice/images/1_netplan.jpg" alt="Сетевая архитектура">
+          <p><img src="/TestingProject_Practice/images/1_netplan.jpg" alt="Сетевая архитектура"></p>
           
           <h3>2. Конфигурация оборудования</h3>
-          <p>Базовая настройка и конфигурация оборудования:</p>
           <pre>
 Switch7 (Основной для доступа)
 enable
@@ -62,19 +62,21 @@ enable secret strongpass
 service password-encryption
 banner motd ^WARNING: Unauthorized access is prohibited!^
 
-Switch8 (Серверный)
-hostname Switch8
-vtp mode transparent
+VLAN и Trunk:
 vtp domain gamedev
-
-Switch9 (Дистрибутивный)
-hostname Switch9
 vtp mode transparent
-vtp domain gamedev
+vlan 2
+ name Programmers
+vlan 3
+ name Servers
+vlan 6
+ name Admins
+interface range e0/1, e0/2
+ switchport mode trunk
           </pre>
 
           <h3>3. Серверы — развертывание служб</h3>
-          <p>Настройка серверов (пример):</p>
+          <p>Настройка серверов:</p>
           <ul>
             <li>WinServer16 (10.0.2.10) — SYSLOG + DNS + DHCP</li>
             <li>WinServer22 (10.0.2.20) — GIT + Jenkins</li>
@@ -98,15 +100,30 @@ vtp domain gamedev
 
           <h4>C. Резервное копирование</h4>
           <ul>
-            <li>WinServer16: резерв DNS, DHCP и SYSLOG</li>
+            <li>WinServer16: резерв DNS, DHCP и SYSLOG каждую ночь</li>
             <li>Linux-сервер: rsnapshot / rsync на внешний диск</li>
           </ul>
 
           <h4>D. Обновления</h4>
           <ul>
-            <li>Windows Server: WSUS или вручную еженедельно</li>
-            <li>Linux: еженедельно вручную</li>
-            <li>Cisco: регулярная проверка и обновление образов</li>
+            <li>Windows Server — WSUS или вручную еженедельно</li>
+            <li>Linux — еженедельно вручную через менеджер пакетов</li>
+            <li>Cisco — регулярная проверка и обновление образов</li>
+          </ul>
+
+          <h4>E. Пароли и аутентификация</h4>
+          <ul>
+            <li>Сложные пароли >= 15 символов</li>
+            <li>Двухфакторная авторизация</li>
+            <li>SSH доступ — по ключам</li>
+          </ul>
+
+          <h4>F. IDS/IPS и защита от атак</h4>
+          <ul>
+            <li>Suricata на pfSense</li>
+            <li>Fail2Ban на Linux</li>
+            <li>Ограничение по MAC-адресу на Switch7/8</li>
+            <li>Port-security на портах доступа</li>
           </ul>
         </div>
       </article>
