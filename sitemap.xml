@@ -2,10 +2,10 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/TestingProject_Practice/categories/</loc>
+    <loc>https://maksinand.github.io/TestingProject_Practice/categories/</loc>
   </url><url>
-    <loc>http://localhost:1313/TestingProject_Practice/tags/</loc>
+    <loc>https://maksinand.github.io/TestingProject_Practice/tags/</loc>
   </url><url>
-    <loc>http://localhost:1313/TestingProject_Practice/</loc>
+    <loc>https://maksinand.github.io/TestingProject_Practice/</loc>
   </url>
 </urlset>
