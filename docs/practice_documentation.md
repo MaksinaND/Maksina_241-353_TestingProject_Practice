@@ -548,3 +548,46 @@ ARP таблица на Win7:
 Для Win7 всё по-прежнему работает.
 
 ![](PNETLab/lab3_2_5_.png)
+
+
+#### VLAN Hopping
+
+##### Часть 1. Демонстрация VLAN Hopping
+
+1.1 Поместим Win10 в `vlan10`:
+![](pictures/lab5_1_1.png)
+
+1.2 Сконфигурируем `trunk port` на Switch7
+![](pictures/lab5_1_2.png)
+
+1.3 Настроим на Switch9 интерфейсы `е0/0`, `e0/1`, `e0/2` в `trunk`.
+![](pictures/lab5_1_3.png)
+
+1.4 Настроим на роутере шлюз для `vlan10`.
+```
+Router(config)#int e0/1.10
+Router(config-subif)#encapsulation dot1q 10
+Router(config-subif)#ip address 192.168.10.1 255.255.255.0
+```
+
+После этих настроек Kali и Win10 будут доступны по сети, но трафик между ними будет проходить через маршрутизацию роутером. Используем атаку VLAN hopping, чтобы получить доступ в рамках широковещательного домена из Kali до Win10.
+
+1.5 Установим `Yersinia`
+![](pictures/lab5_1_4.png)
+
+1.6 Запустим `Yersinia`
+![](pictures/lab5_1_5.png)
+
+1.7 Проведем атаку на протокол DTP
+![](pictures/lab5_1_6.png)
+
+1.8 Подготовим интерфейсы Kali
+![](pictures/lab5_1_7.png)
+
+1.9 С помощью Wireshark проанализируем исходящий трафик от Kali найдём трафик с `vlan id 10`.
+![](pictures/lab5_1_8.png)
+
+##### Часть 2. Защита от VLAN Hopping
+
+2.1 Из этого состояния порт может перейти в trunk, DTP-кадры при этом не передаются
+![](pictures/lab5_2_1.png)
