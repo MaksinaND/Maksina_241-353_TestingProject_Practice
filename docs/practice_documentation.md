@@ -582,7 +582,15 @@ Router(config-subif)#ip address 192.168.10.1 255.255.255.0
 ![](PNETLab/lab5_1_6.png)
 
 1.8 Подготовим интерфейсы Kali
-![](PNETLab/lab5_1_7.png)
+```
+root@kali:# modprobe 8021q
+
+root@kali:# vconfig add eth0 10
+
+root@kali:# ifconfig eth0.10 up
+
+    где 10 – vlan i
+```
 
 1.9 С помощью Wireshark проанализируем исходящий трафик от Kali найдём трафик с `vlan id 10`.
 ![](PNETLab/lab5_1_8.png)
